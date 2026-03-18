@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Future Me</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0f;
+    --surface: #1a1a1c;
+    --surface2: #242428;
+    --border: #2e2e34;
+    --accent: #c8f060;
+    --accent2: #60c8f0;
+    --text: #e8e8e4;
+    --muted: #6b6b72;
+    --danger: #f06060;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 32px 40px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+  }
+  header span {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary {
+    background: var(--accent);
+    color: #0e0e0f;
+    border-color: var(--accent);
+    font-weight: 500;
+  }
+  .btn.primary:hover { background: #d8ff70; color: #0e0e0f; }
+
+  /* ── Dial Area ── */
+  .dial-section {
+    padding: 40px;
+    position: relative;
+  }
+  .dial-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .dial-container {
+    position: relative;
+    overflow: hidden;
+  }
+  .dial-track {
+    display: flex;
+    gap: 12px;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    padding: 8px 0;
+  }
+  .dial-item {
+    flex-shrink: 0;
+    width: 180px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .dial-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.2s;
+  }
+  .dial-item.active {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+  .dial-item.active::before { transform: scaleX(1); }
+  .dial-item-name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dial-item-meta {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .dial-item-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--muted);
+    display: inline-block;
+    margin-right: 6px;
+  }
+  .dial-item.active .dial-item-dot { background: var(--accent); }
+  .dial-item.has-history .dial-item-dot { background: var(--accent2); }
+  .dial-item.active.has-history .dial-item-dot { background: var(--accent); }
+
+  .dial-arrows {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .arrow-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 36px; height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .arrow-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .add-task-btn {
+    flex-shrink: 0;
+    width: 180px;
+    padding: 20px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .add-task-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── Timeline ── */
+  .timeline-section {
+    padding: 0 40px 40px;
+  }
+  .timeline-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .timeline-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--text);
+  }
+  .timeline-title em {
+    color: var(--accent);
+    font-style: italic;
+  }
+  .timeline-actions { margin-left: auto; display: flex; gap: 8px; }
+
+  .year-row {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2px;
+    align-items: stretch;
+    min-height: 80px;
+  }
+  .year-label {
+    width: 80px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 20px;
+    font-size: 13px;
+    color: var(--muted);
+    position: relative;
+  }
+  .year-label.current { color: var(--accent); font-weight: 500; }
+  .year-label::after {
+    content: '';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transform: translateY(-50%);
+  }
+  .year-label.current::after { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .year-label.has-data::after { background: var(--accent2); }
+
+  .year-line {
+    position: absolute;
+    right: 10px;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .year-content {
+    flex: 1;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-left: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .year-content:hover { border-color: var(--border); background: var(--surface2); }
+  .year-content.current-year {
+    border-color: var(--accent);
+    border-left-width: 3px;
+  }
+  .year-content.empty {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--border);
+    cursor: default;
+  }
+  .year-content.empty:hover { background: transparent; }
+
+  .entry-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .entry-note {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .entry-steps {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .step-chip {
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    display: flex; align-items: center; gap: 4px;
+  }
+  .step-chip.done { border-color: var(--accent2); color: var(--accent2); }
+  .step-chip.flagged { border-color: var(--danger); color: var(--danger); }
+
+  .empty-label {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* ── Panels ── */
+  .panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .panel-overlay.open { display: flex; }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 32px;
+    animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  @keyframes slideUp {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .panel h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 24px;
+  }
+  .panel h2 em { color: var(--accent); font-style: italic; }
+  .panel-close {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+  .panel-close:hover { color: var(--text); }
+
+  .field { margin-bottom: 20px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .field input, .field textarea, .field select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    border-color: var(--accent);
+  }
+  .field textarea { resize: vertical; min-height: 80px; }
+
+  /* Steps editor */
+  .steps-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+  .step-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .step-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    outline: none;
+  }
+  .step-row input:focus { border-color: var(--accent); }
+  .step-remove {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 28px; height: 28px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .step-remove:hover { border-color: var(--danger); color: var(--danger); }
+  .add-step-btn {
+    background: none;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    padding: 7px 14px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    transition: all 0.15s;
+    width: 100%;
+    text-align: left;
+  }
+  .add-step-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Checklist panel */
+  .checklist-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .check-box {
+    width: 20px; height: 20px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    transition: all 0.15s;
+    margin-top: 1px;
+  }
+  .check-box.checked { background: var(--accent); border-color: var(--accent); color: #0e0e0f; }
+  .check-content { flex: 1; }
+  .check-label {
+    font-size: 13px;
+    margin-bottom: 6px;
+    transition: color 0.15s;
+  }
+  .check-label.done { color: var(--muted); text-decoration: line-through; }
+  .check-note {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid transparent;
+    color: var(--muted);
+    padding: 6px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    outline: none;
+    transition: all 0.15s;
+    resize: none;
+  }
+  .check-note:focus { border-color: var(--border); color: var(--text); }
+  .check-note::placeholder { color: var(--border); }
+  .flag-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 3px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    margin-top: 6px;
+    transition: all 0.15s;
+  }
+  .flag-btn:hover, .flag-btn.flagged { border-color: var(--danger); color: var(--danger); }
+
+  /* Preview section inside panel */
+  .preview-block {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .preview-year {
+    font-size: 11px;
+    color: var(--accent2);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+  .preview-steps { display: flex; flex-direction: column; gap: 6px; }
+  .preview-step {
+    font-size: 12px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .preview-step-num { color: var(--muted); flex-shrink: 0; }
+  .preview-step-text { flex: 1; }
+  .preview-step-note {
+    font-size: 11px;
+    color: var(--danger);
+    margin-top: 2px;
+  }
+  .flag-icon { color: var(--danger); }
+
+  .confirm-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .confirm-row span { font-size: 13px; flex: 1; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--muted);
+  }
+  .empty-state h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+  .empty-state p { font-size: 13px; line-height: 1.7; margin-bottom: 24px; }
+
+  /* Notification dot */
+  .notif {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-left: 6px;
+    vertical-align: middle;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  .text-muted { color: var(--muted); font-size: 12px; }
+
+  /* ── Photos ── */
+  .photo-section { margin-top: 20px; }
+  .photo-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .photo-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .photo-thumb {
+    width: 80px; height: 80px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s;
+    position: relative;
+  }
+  .photo-thumb:hover { border-color: var(--accent); }
+  .photo-thumb-wrap {
+    position: relative;
+    display: inline-block;
+  }
+  .photo-delete {
+    position: absolute;
+    top: 2px; right: 2px;
+    background: rgba(0,0,0,0.7);
+    border: none;
+    color: var(--danger);
+    width: 18px; height: 18px;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .photo-thumb-wrap:hover .photo-delete { opacity: 1; }
+  .photo-upload-btn {
+    width: 80px; height: 80px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .photo-upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border: 1px solid var(--border);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 20px; right: 20px;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 28px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Future Me</h1>
+  <span>年次タスク記憶ツール</span>
+  <div class="header-actions">
+    <button class="btn" onclick="openAddTask()">+ タスク追加</button>
+  </div>
+</header>
+
+<!-- Dial -->
+<div class="dial-section">
+  <div class="dial-label">タスクを選ぶ</div>
+  <div class="dial-container">
+    <div class="dial-track" id="dialTrack"></div>
+  </div>
+  <div class="dial-arrows">
+    <button class="arrow-btn" onclick="scrollDial(-1)">←</button>
+    <button class="arrow-btn" onclick="scrollDial(1)">→</button>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="timeline-section" id="timelineSection">
+  <div class="empty-state" id="emptyState">
+    <h2>はじめましょう</h2>
+    <p>タスクを追加して、<br>毎年の作業を未来の自分へ引き継ごう。</p>
+    <button class="btn primary" onclick="openAddTask()">最初のタスクを追加</button>
+  </div>
+  <div id="timelineContent" style="display:none">
+    <div class="timeline-header">
+      <div class="timeline-title" id="timelineTitle">—</div>
+      <div class="timeline-actions">
+        <button class="btn" onclick="openStartChecklist()">今年の作業を開始</button>
+        <button class="btn" onclick="openEditTask()">編集</button>
+      </div>
+    </div>
+    <div id="yearRows"></div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<!-- Add/Edit Task Panel -->
+<div class="panel-overlay" id="addTaskPanel">
+  <div class="panel">
+    <button class="panel-close" onclick="closePanel('addTaskPanel')">✕</button>
+    <h2 id="addTaskTitle">新しい<em>タスク</em>を追加</h2>
+    <div class="field">
+      <label>タスク名</label>
+      <input type="text" id="taskName" placeholder="例: 確定申告、車検、サブスク見直し">
+    </div>
+    <div class="field">
+      <label>毎年の時期（目安）</label>
+      <input type="text" id="taskSeason" placeholder="例: 2月〜3月、毎年7月">
+    </div>
+    <div class="field">
+      <label>手順（ステップ）</label>
+      <div class="steps-list" id="stepsList"></div>
+      <button class="add-step-btn" onclick="addStepField()">+ ステップを追加</button>
+    </div>
+    <div class="field">
+      <label>メモ・注意点</label>
+      <textarea id="taskNote" placeholder="初回だけ必要なこと、注意点など"></textarea>
+    </div>
+    <div style="display:flex; gap:10px; margin-top:8px;">
+      <button class="btn primary" onclick="saveTask()">保存</button>
+      <button class="btn" onclick="closePanel('addTaskPanel')">キャンセル</button>
+      <button class="btn" id="deleteTaskBtn" style="margin-left:auto; display:none" onclick="deleteTask()">削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- Checklist Panel -->
+<div class="panel-overlay" id="checklistPanel">
+  <div class="panel">
+    <button class="panel-close" onclick="closePanel('checklistPanel')">✕</button>
+    <h2 id="checklistTitle">作業<em>チェックリスト</em></h2>
+    <div id="previewBlocks"></div>
+    <div id="confirmRow"></div>
+    <div id="checklistItems"></div>
+    <div class="photo-section">
+      <div class="photo-label">写真を追加</div>
+      <div class="photo-grid" id="photoGrid"></div>
+      <input type="file" id="photoInput" accept="image/*" multiple style="display:none" onchange="handlePhotoUpload(event)">
+    </div>
+    <div style="display:flex; gap:10px; margin-top:24px;">
+      <button class="btn primary" onclick="saveChecklist()">完了・保存</button>
+      <button class="btn" onclick="closePanel('checklistPanel')">後で</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── IndexedDB for photos ──────────────────────────────
+const DB_NAME = 'future_me_photos';
+const DB_VERSION = 1;
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains('photos')) {
+        d.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+        d.createObjectStore('photo_index', { keyPath: 'key' });
+      }
+    };
+    req.onsuccess = e => { db = e.target.result; resolve(db); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbPut(store, data) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).put(data);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbGet(store, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readonly');
+    const req = tx.objectStore(store).get(key);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbDelete(store, key) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(store, 'readwrite');
+    const req = tx.objectStore(store).delete(key);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function photoIndexKey(taskId, year) { return `${taskId}_${year}`; }
+
+async function getPhotoIds(taskId, year) {
+  const rec = await dbGet('photo_index', photoIndexKey(taskId, year));
+  return rec ? rec.ids : [];
+}
+
+async function setPhotoIds(taskId, year, ids) {
+  await dbPut('photo_index', { key: photoIndexKey(taskId, year), ids });
+}
+
+// ── Photo upload/render ───────────────────────────────
+let currentPhotoTaskId = null;
+let currentPhotoYear = null;
+
+async function renderPhotoGrid(taskId, year, readOnly = false) {
+  currentPhotoTaskId = taskId;
+  currentPhotoYear = year;
+  const grid = document.getElementById('photoGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const ids = await getPhotoIds(taskId, year);
+  for (const id of ids) {
+    const rec = await dbGet('photos', id);
+    if (!rec) continue;
+    const wrap = document.createElement('div');
+    wrap.className = 'photo-thumb-wrap';
+    wrap.innerHTML = `
+      <img class="photo-thumb" src="${rec.data}" onclick="openLightbox('${rec.data}')">
+      ${!readOnly ? `<button class="photo-delete" onclick="deletePhoto(${id})">✕</button>` : ''}
+    `;
+    grid.appendChild(wrap);
+  }
+
+  if (!readOnly) {
+    const addBtn = document.createElement('button');
+    addBtn.className = 'photo-upload-btn';
+    addBtn.textContent = '+';
+    addBtn.onclick = () => document.getElementById('photoInput').click();
+    grid.appendChild(addBtn);
+  }
+}
+
+async function handlePhotoUpload(event) {
+  const files = Array.from(event.target.files);
+  for (const file of files) {
+    const data64 = await new Promise(res => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.readAsDataURL(file);
+    });
+    const id = await dbPut('photos', { data: data64, name: file.name, savedAt: Date.now() });
+    const ids = await getPhotoIds(currentPhotoTaskId, currentPhotoYear);
+    ids.push(id);
+    await setPhotoIds(currentPhotoTaskId, currentPhotoYear, ids);
+  }
+  event.target.value = '';
+  renderPhotoGrid(currentPhotoTaskId, currentPhotoYear);
+}
+
+async function deletePhoto(id) {
+  await dbDelete('photos', id);
+  const ids = await getPhotoIds(currentPhotoTaskId, currentPhotoYear);
+  const newIds = ids.filter(i => i !== id);
+  await setPhotoIds(currentPhotoTaskId, currentPhotoYear, newIds);
+  renderPhotoGrid(currentPhotoTaskId, currentPhotoYear);
+}
+
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+
+// ── Data ──────────────────────────────────────────────
+const STORAGE_KEY = 'future_me_data';
+const CURRENT_YEAR = new Date().getFullYear();
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { tasks: [], entries: {} }; }
+  catch { return { tasks: [], entries: {} }; }
+}
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let data = loadData();
+let activeTaskId = null;
+let editingTaskId = null;
+let checklistState = {};
+
+// ── Dial ──────────────────────────────────────────────
+let dialOffset = 0;
+
+function renderDial() {
+  const track = document.getElementById('dialTrack');
+  track.innerHTML = '';
+
+  data.tasks.forEach((task, i) => {
+    const hasHistory = getHistoryYears(task.id).length > 0;
+    const div = document.createElement('div');
+    div.className = 'dial-item' +
+      (task.id === activeTaskId ? ' active' : '') +
+      (hasHistory ? ' has-history' : '');
+    div.onclick = () => selectTask(task.id);
+
+    const season = task.season || '時期未設定';
+    div.innerHTML = `
+      <div class="dial-item-name">
+        <span class="dial-item-dot"></span>${task.name}
+      </div>
+      <div class="dial-item-meta">${season}</div>
+    `;
+    track.appendChild(div);
+  });
+
+  // Add button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-task-btn';
+  addBtn.textContent = '+ タスクを追加';
+  addBtn.onclick = openAddTask;
+  track.appendChild(addBtn);
+
+  track.style.transform = `translateX(${dialOffset}px)`;
+}
+
+function scrollDial(dir) {
+  const itemW = 192;
+  const max = 0;
+  const min = -Math.max(0, (data.tasks.length - 3)) * itemW;
+  dialOffset = Math.min(max, Math.max(min, dialOffset - dir * itemW));
+  document.getElementById('dialTrack').style.transform = `translateX(${dialOffset}px)`;
+}
+
+function selectTask(id) {
+  activeTaskId = id;
+  renderDial();
+  renderTimeline();
+}
+
+// ── Timeline ──────────────────────────────────────────
+function getHistoryYears(taskId) {
+  const entries = data.entries[taskId] || {};
+  return Object.keys(entries).map(Number).sort((a, b) => b - a);
+}
+
+function renderTimeline() {
+  const task = data.tasks.find(t => t.id === activeTaskId);
+  if (!task) {
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('timelineContent').style.display = 'none';
+    return;
+  }
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('timelineContent').style.display = 'block';
+
+  const titleEl = document.getElementById('timelineTitle');
+  const hasNotif = !data.entries[task.id]?.[CURRENT_YEAR];
+  titleEl.innerHTML = `<em>${task.name}</em>${hasNotif ? '<span class="notif"></span>' : ''}`;
+
+  const years = [CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2];
+  const container = document.getElementById('yearRows');
+  container.innerHTML = '';
+
+  years.forEach(year => {
+    const entry = data.entries[task.id]?.[year];
+    const isCurrent = year === CURRENT_YEAR;
+
+    const row = document.createElement('div');
+    row.className = 'year-row';
+
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'year-label' +
+      (isCurrent ? ' current' : '') +
+      (entry ? ' has-data' : '');
+    labelDiv.innerHTML = `<div class="year-line"></div>${year}`;
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'year-content' +
+      (isCurrent ? ' current-year' : '') +
+      (!entry ? ' empty' : '');
+
+    if (entry) {
+      const steps = entry.steps || [];
+      const doneCount = steps.filter(s => s.checked).length;
+      const flagged = steps.filter(s => s.flagged);
+
+      contentDiv.innerHTML = `
+        <div class="entry-title">${isCurrent ? '今年の記録' : year + 'の記録'}</div>
+        <div class="entry-note">${entry.note || ''}</div>
+        <div class="entry-steps">
+          ${steps.map(s => `
+            <div class="step-chip ${s.checked ? 'done' : ''} ${s.flagged ? 'flagged' : ''}">
+              ${s.flagged ? '<span class="flag-icon">⚑</span>' : (s.checked ? '✓' : '○')} ${s.label}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      if (!isCurrent) {
+        contentDiv.onclick = () => openPreview(year);
+        contentDiv.style.cursor = 'pointer';
+      }
+    } else {
+      contentDiv.innerHTML = `<div class="empty-label">${isCurrent ? '→ 今年の作業を開始できます' : '記録なし'}</div>`;
+      if (isCurrent) {
+        contentDiv.onclick = openStartChecklist;
+        contentDiv.style.cursor = 'pointer';
+      }
+    }
+
+    row.appendChild(labelDiv);
+    row.appendChild(contentDiv);
+    container.appendChild(row);
+  });
+}
+
+// ── Add/Edit Task ──────────────────────────────────────
+function openAddTask() {
+  editingTaskId = null;
+  document.getElementById('addTaskTitle').innerHTML = '新しい<em>タスク</em>を追加';
+  document.getElementById('taskName').value = '';
+  document.getElementById('taskSeason').value = '';
+  document.getElementById('taskNote').value = '';
+  document.getElementById('deleteTaskBtn').style.display = 'none';
+  renderStepFields([]);
+  openPanel('addTaskPanel');
+}
+
+function openEditTask() {
+  const task = data.tasks.find(t => t.id === activeTaskId);
+  if (!task) return;
+  editingTaskId = task.id;
+  document.getElementById('addTaskTitle').innerHTML = `<em>${task.name}</em>を編集`;
+  document.getElementById('taskName').value = task.name;
+  document.getElementById('taskSeason').value = task.season || '';
+  document.getElementById('taskNote').value = task.note || '';
+  document.getElementById('deleteTaskBtn').style.display = 'block';
+  renderStepFields(task.steps || []);
+  openPanel('addTaskPanel');
+}
+
+function renderStepFields(steps) {
+  const list = document.getElementById('stepsList');
+  list.innerHTML = '';
+  steps.forEach((s, i) => addStepField(s));
+}
+
+function addStepField(value = '') {
+  const list = document.getElementById('stepsList');
+  const row = document.createElement('div');
+  row.className = 'step-row';
+  row.innerHTML = `
+    <input type="text" placeholder="ステップ ${list.children.length + 1}" value="${value}">
+    <button class="step-remove" onclick="this.parentNode.remove()">×</button>
+  `;
+  list.appendChild(row);
+}
+
+function saveTask() {
+  const name = document.getElementById('taskName').value.trim();
+  if (!name) { alert('タスク名を入力してください'); return; }
+
+  const steps = [...document.querySelectorAll('#stepsList .step-row input')]
+    .map(i => i.value.trim()).filter(Boolean);
+  const season = document.getElementById('taskSeason').value.trim();
+  const note = document.getElementById('taskNote').value.trim();
+
+  if (editingTaskId) {
+    const task = data.tasks.find(t => t.id === editingTaskId);
+    task.name = name; task.season = season; task.note = note; task.steps = steps;
+  } else {
+    const id = 'task_' + Date.now();
+    data.tasks.push({ id, name, season, note, steps });
+    activeTaskId = id;
+  }
+  saveData(data);
+  closePanel('addTaskPanel');
+  renderDial();
+  renderTimeline();
+}
+
+function deleteTask() {
+  if (!confirm('このタスクを削除しますか？')) return;
+  data.tasks = data.tasks.filter(t => t.id !== editingTaskId);
+  delete data.entries[editingTaskId];
+  if (activeTaskId === editingTaskId) activeTaskId = data.tasks[0]?.id || null;
+  saveData(data);
+  closePanel('addTaskPanel');
+  renderDial();
+  renderTimeline();
+}
+
+// ── Checklist ─────────────────────────────────────────
+async function openStartChecklist() {
+  const task = data.tasks.find(t => t.id === activeTaskId);
+  if (!task) return;
+
+  document.getElementById('checklistTitle').innerHTML = `<em>${task.name}</em> ${CURRENT_YEAR}`;
+
+  // Preview blocks (past 2 years)
+  const previewEl = document.getElementById('previewBlocks');
+  previewEl.innerHTML = '';
+  const histYears = getHistoryYears(task.id).filter(y => y < CURRENT_YEAR).slice(0, 2);
+
+  if (histYears.length > 0) {
+    histYears.forEach(year => {
+      const entry = data.entries[task.id][year];
+      const block = document.createElement('div');
+      block.className = 'preview-block';
+      const flagged = (entry.steps || []).filter(s => s.flagged);
+      block.innerHTML = `
+        <div class="preview-year">${year} の記録</div>
+        ${entry.note ? `<div style="font-size:12px; color:var(--muted); margin-bottom:8px;">${entry.note}</div>` : ''}
+        <div class="preview-steps">
+          ${(entry.steps || []).map((s, i) => `
+            <div class="preview-step">
+              <span class="preview-step-num">${String(i+1).padStart(2,'0')}</span>
+              <div class="preview-step-text">
+                ${s.label}
+                ${s.memo ? `<div class="preview-step-note">⚑ ${s.memo}</div>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      previewEl.appendChild(block);
+    });
+
+    // Confirm row
+    document.getElementById('confirmRow').innerHTML = `
+      <div class="confirm-row">
+        <span>前回と同じ手順でよいですか？</span>
+        <button class="btn primary" onclick="useLastSteps()">Yes, 同じ手順で</button>
+        <button class="btn" onclick="useTaskSteps()">いいえ、テンプレートから</button>
+      </div>
+    `;
+  } else {
+    document.getElementById('confirmRow').innerHTML = '';
+  }
+
+  // Init checklist state
+  checklistState = {};
+  const steps = task.steps || [];
+  steps.forEach((s, i) => {
+    checklistState[i] = { label: s, checked: false, memo: '', flagged: false };
+  });
+
+  renderChecklistItems();
+  await renderPhotoGrid(task.id, CURRENT_YEAR);
+  openPanel('checklistPanel');
+}
+
+function useLastSteps() {
+  const task = data.tasks.find(t => t.id === activeTaskId);
+  const histYears = getHistoryYears(task.id).filter(y => y < CURRENT_YEAR);
+  if (histYears.length === 0) return;
+  const lastEntry = data.entries[task.id][histYears[0]];
+  checklistState = {};
+  (lastEntry.steps || []).forEach((s, i) => {
+    checklistState[i] = { label: s.label, checked: false, memo: '', flagged: false };
+  });
+  document.getElementById('confirmRow').innerHTML = '';
+  renderChecklistItems();
+}
+
+function useTaskSteps() {
+  const task = data.tasks.find(t => t.id === activeTaskId);
+  checklistState = {};
+  (task.steps || []).forEach((s, i) => {
+    checklistState[i] = { label: s, checked: false, memo: '', flagged: false };
+  });
+  document.getElementById('confirmRow').innerHTML = '';
+  renderChecklistItems();
+}
+
+function renderChecklistItems() {
+  const el = document.getElementById('checklistItems');
+  el.innerHTML = '';
+
+  Object.entries(checklistState).forEach(([i, s]) => {
+    const div = document.createElement('div');
+    div.className = 'checklist-item';
+    div.innerHTML = `
+      <div class="check-box ${s.checked ? 'checked' : ''}" onclick="toggleCheck(${i})">
+        ${s.checked ? '✓' : ''}
+      </div>
+      <div class="check-content">
+        <div class="check-label ${s.checked ? 'done' : ''}">${s.label}</div>
+        <textarea class="check-note" rows="1" placeholder="一言メモを残す（詰まった点など）"
+          onchange="updateMemo(${i}, this.value)">${s.memo}</textarea>
+        <button class="flag-btn ${s.flagged ? 'flagged' : ''}" onclick="toggleFlag(${i})">
+          ⚑ ${s.flagged ? '要注意マーク済み' : '要注意マーク'}
+        </button>
+      </div>
+    `;
+    el.appendChild(div);
+  });
+}
+
+function toggleCheck(i) {
+  checklistState[i].checked = !checklistState[i].checked;
+  renderChecklistItems();
+}
+function updateMemo(i, val) { checklistState[i].memo = val; }
+function toggleFlag(i) {
+  checklistState[i].flagged = !checklistState[i].flagged;
+  renderChecklistItems();
+}
+
+function saveChecklist() {
+  const task = data.tasks.find(t => t.id === activeTaskId);
+  if (!task) return;
+  if (!data.entries[task.id]) data.entries[task.id] = {};
+
+  const steps = Object.values(checklistState).map(s => ({
+    label: s.label,
+    checked: s.checked,
+    memo: s.memo,
+    flagged: s.flagged
+  }));
+  const flagged = steps.filter(s => s.flagged);
+  const note = flagged.length > 0
+    ? `要注意: ${flagged.map(s => s.label).join('、')}`
+    : '';
+
+  data.entries[task.id][CURRENT_YEAR] = { steps, note, savedAt: Date.now() };
+  saveData(data);
+  closePanel('checklistPanel');
+  renderTimeline();
+}
+
+async function openPreview(year) {
+  const task = data.tasks.find(t => t.id === activeTaskId);
+  if (!task) return;
+  const entry = data.entries[task.id]?.[year];
+  if (!entry) return;
+
+  document.getElementById('checklistTitle').innerHTML = `<em>${task.name}</em> ${year} のプレビュー`;
+  const previewEl = document.getElementById('previewBlocks');
+  previewEl.innerHTML = `
+    <div class="preview-block">
+      <div class="preview-year">${year} の記録</div>
+      ${entry.note ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${entry.note}</div>` : ''}
+      <div class="preview-steps">
+        ${(entry.steps || []).map((s, i) => `
+          <div class="preview-step">
+            <span class="preview-step-num">${String(i+1).padStart(2,'0')}</span>
+            <div class="preview-step-text">
+              ${s.checked ? '<span style="color:var(--accent2)">✓</span>' : '○'} ${s.label}
+              ${s.memo ? `<div class="preview-step-note">⚑ ${s.memo}</div>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('confirmRow').innerHTML = '';
+  document.getElementById('checklistItems').innerHTML = '';
+  await renderPhotoGrid(task.id, year, true);
+  openPanel('checklistPanel');
+}
+
+// ── Panel utils ───────────────────────────────────────
+function openPanel(id) { document.getElementById(id).classList.add('open'); }
+function closePanel(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close on overlay click
+document.querySelectorAll('.panel-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ── Init ──────────────────────────────────────────────
+async function init() {
+  await openDB();
+  if (data.tasks.length > 0) activeTaskId = data.tasks[0].id;
+  renderDial();
+  renderTimeline();
+}
+
+init();
+</script>
+</body>
+</html>
